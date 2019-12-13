@@ -488,10 +488,15 @@ def main(_):
   for input_file in input_files:
     tf.logging.info("  %s" % input_file)
 
+  # 2019.12.13
+  # TPU works without giving tpu_name.
+  # tpu_name is given by Kubernetes Engine (GKE).
+  # https://www.tensorflow.org/api_docs/python/tf/distribute/cluster_resolver/TPUClusterResolver
+  # https://github.com/tensorflow/tensorflow/blob/r2.0/tensorflow/python/distribute/cluster_resolver/tpu_cluster_resolver.py#L257
   tpu_cluster_resolver = None
-  if FLAGS.use_tpu and FLAGS.tpu_name:
-    tpu_cluster_resolver = contrib_cluster_resolver.TPUClusterResolver(
-        FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
+  if FLAGS.use_tpu:
+    tpu_name = FLAGS.tpu_name if FLAGS.tpu_name is not None else None
+    tpu_cluster_resolver = contrib_cluster_resolver.TPUClusterResolver(tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
 
   is_per_host = contrib_tpu.InputPipelineConfig.PER_HOST_V2
   run_config = contrib_tpu.RunConfig(
