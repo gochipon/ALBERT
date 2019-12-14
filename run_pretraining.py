@@ -224,14 +224,24 @@ def model_fn_builder(albert_config, init_checkpoint, learning_rate,
       train_op = optimization.create_optimizer(
           total_loss, learning_rate, num_train_steps, num_warmup_steps,
           use_tpu, optimizer, poly_power, start_warmup_step)
-      # 2019.12.13 add loss log
-      logging_hook = tf.train.LoggingTensorHook({"loss": total_loss}, every_n_iter=10)
-      output_spec = contrib_tpu.TPUEstimatorSpec(
+
+      # 2019.12.14
+      # POINT: TPU利用時はlogging_hookを利用しない(TPU実行中にerrorになる)
+      if use_tpu:
+        output_spec = contrib_tpu.TPUEstimatorSpec(
+          mode=mode,
+          loss=total_loss,
+          train_op=train_op,
+          caffold_fn=scaffold_fn)
+      else:
+        logging_hook = tf.train.LoggingTensorHook({"loss": total_loss}, every_n_iter=10)
+        output_spec = contrib_tpu.TPUEstimatorSpec(
           mode=mode,
           loss=total_loss,
           training_hooks=[logging_hook],
           train_op=train_op,
           scaffold_fn=scaffold_fn)
+
     elif mode == tf.estimator.ModeKeys.EVAL:
 
       def metric_fn(*args):
