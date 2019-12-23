@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """BERT finetuning on classification tasks."""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -151,6 +150,7 @@ def main(_):
       "qqp": classifier_utils.QqpProcessor,
       "qnli": classifier_utils.QnliProcessor,
       "wnli": classifier_utils.WnliProcessor,
+      "livedoor": classifier_utils.LivedoorProcessor
   }
 
   tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,

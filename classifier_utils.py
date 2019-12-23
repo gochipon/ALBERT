@@ -552,7 +552,43 @@ class AXProcessor(DataProcessor):
           InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
     return examples
 
+class LivedoorProcessor(DataProcessor):
+  """Processor for the livedoor data set (see https://www.rondhuit.com/download.html)."""
+  
+  def get_train_examples(self, data_dir):
+    """See base class."""
+    return self._create_examples(
+      self._read_tsv(os.path.join(data_dir, "train.tsv")), "train")
 
+  def get_dev_examples(self, data_dir):
+    """See base class."""
+    return self._create_examples(
+      self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+  
+  def get_test_examples(self, data_dir):
+    """See base class."""
+    return self._create_examples(
+      self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
+  
+  def get_labels(self):
+    """See base class."""
+    return ['dokujo-tsushin', 'it-life-hack', 'kaden-channel', 'livedoor-homme', 'movie-enter', 'peachy', 'smax', 'sports-watch', 'topic-news']
+
+  def _create_examples(self, lines, set_type):
+    """Creates examples for the training and dev sets."""
+    examples = []
+    for (i, line) in enumerate(lines):
+      if i == 0:
+        idx_text = line.index('text')
+        idx_label = line.index('label')
+      else:
+        guid = "%s-%s" % (set_type, i)
+        text_a = tokenization.convert_to_unicode(line[idx_text])
+        label = tokenization.convert_to_unicode(line[idx_label])
+        examples.append(
+          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+    return examples
+      
 def convert_single_example(ex_index, example, label_list, max_seq_length,
                            tokenizer, task_name):
   """Converts a single `InputExample` into a single `InputFeatures`."""
